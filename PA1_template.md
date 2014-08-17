@@ -7,57 +7,90 @@ output:
 Reproducible Research: Peer Assessment 1
 ====================================================================
 
-```{r}
+
+```r
 library(lattice)
 ```
-```{r setoptions, echo= TRUE, include=TRUE}
 
-```
 
 #####Loading and preprocessing the data
-```{r}
+
+```r
 thefile<- "C:/Documents and Settings/tbelay/Desktop/coursera/ReproducibleResearch/Project1/RepData_PeerAssessment1/Activity.zip"
 data<- read.csv(unzip(thefile, "activity.csv"))
 ```
 ######Removing the missing values
-```{r}
+
+```r
 data1<-na.omit(data)
 ```
 ### What is mean total number of steps taken per day?
-```{r}
+
+```r
 total_steps_perday<-tapply(data1$steps,data1$date,sum)
 total_steps_perday<-as.data.frame(total_steps_perday); colnames(total_steps_perday)<-c("steps")
 
 hist(total_steps_perday$steps, col="darkgreen", main="Total steps per day", xlab="")
+```
+
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4.png) 
+
+```r
 mean(total_steps_perday$steps, na.rm=T)
+```
+
+```
+## [1] 10766
+```
+
+```r
 median(total_steps_perday$steps, na.rm=T)
+```
+
+```
+## [1] 10765
 ```
 
 ### What is the average daily activity pattern?
 
-```{r}
+
+```r
 plot(tapply(data1$steps, data1$interval, mean), ylab="Average steps", type="l", xaxt = 'n')
 axis(1, labels = c('0:00', '5:00', '10:00', '15:00', '20:00'), at = c(0, 50, 100, 150, 200))
 ```
 
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
+
 ######The interval which contains the maximum average steps across all the days is: 
 
-```{r}
+
+```r
 data1$date[max(tapply(data1$steps, data1$interval, mean))]
+```
+
+```
+## [1] 2012-10-02
+## 61 Levels: 2012-10-01 2012-10-02 2012-10-03 2012-10-04 ... 2012-11-30
 ```
 
 ### Imputing missing values
 
 ###### number of missing values in the dataset (i.e. the total number of rows with NAs)
 
-```{r}
+
+```r
 sum(is.na(data))
+```
+
+```
+## [1] 2304
 ```
 
 ##### my strategies for filling the missing values are: 
         1. to use global average if the number of missing values per day is more than half of the available data for the day
         2. to use the average for the day if the number of missing values is less than half
-```{r} 
+
+```r
 perday<-split(data,data$date)
 newdata<-data.frame()
 for(i in 1:length(perday)){    
@@ -76,18 +109,38 @@ for(i in 1:length(perday)){
 hist(tapply(newdata$steps,newdata$date,sum), col="darkblue", main="Total steps per day after filling the missing values", xlab="")
 ```
 
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png) 
+
 ##### The 'newdata' at the end of the above 'for' loop contains the original dataset with the missing values filled
-```{r}
+
+```r
 sum(is.na(newdata))
 ```
+
+```
+## [1] 0
+```
 ###### The mean and median of the total number of steps taken per day
-```{r}
+
+```r
         mean(tapply(newdata$steps,newdata$interval,sum))
+```
+
+```
+## [1] 2280
+```
+
+```r
         median(tapply(newdata$steps,newdata$interval,sum))
+```
+
+```
+## [1] 2107
 ```
 ### Are there differences in activity patterns between weekdays and weekends?
 ###### creating a new variable
-```{r}
+
+```r
 newdata$dtfactor<-""
 
 newdata[(weekdays(as.Date(newdata$date)) %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")),]$dtfactor<-"weekday"
@@ -96,6 +149,9 @@ agg_newdata<- aggregate(newdata$steps, by=list(newdata$interval, newdata$dtfacto
 colnames(agg_newdata)<-c("interval","datefactor", "meansteps")
 ```
 ##### make a pannel plot containing a time series plot
-```{r}
+
+```r
 xyplot(meansteps~interval|datefactor, data=agg_newdata, layout=c(1,2), type="l", ylab="Number of steps")
 ```
+
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12.png) 
